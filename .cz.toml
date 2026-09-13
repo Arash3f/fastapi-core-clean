@@ -1,0 +1,69 @@
+[tool.commitizen]
+name = "cz_customize"
+version = "0.1.0"
+tag_format = "v$version"
+
+[tool.commitizen.customize]
+message_template = """{{prefix}}{% if scope %}({{scope}}){% endif %}: {{message}}
+{% if description %}{{description}}{% endif %}
+{% if issue_number %}Closes #{{issue_number}}{% endif %}
+"""
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "prefix"
+message = "Select the type of change you are committing"
+choices = [
+  { value = ':sparkles: feat', name = "✨ feat: Adding a new feature." },
+  { value = ":wrench: fix", name = "🔧 fix: Fixing a bug." },
+  { value = ":memo: docs", name = "📝 docs: Add or update documentation." },
+  { value = ":hammer: ref", name = "🔨 refactor: Refactoring code." },
+  { value = ":fire: perf", name = "🔥 perf: Performance improvement." },
+  { value = ":package: chore", name = "📦 chore: Add or update compiled files or packages." },
+  { value = ":construction: wip", name = "🚧 wip: Work in progress." },
+  { value = ":poop: Bcode", name = "💩 Bcode: Write bad code that needs to be improved." },
+  { value = ":bookmark: version", name = "🔖 ver: New Release or Version." },
+  { value = ":rocket: deploy", name = "🚀 depl: Ready to deploy." },
+]
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "scope"
+message = "Select the scope of this change (optional): "
+choices = [
+  { value = "", name = "No scope" },
+
+  { value = "domain", name = "domain" },
+  { value = "application", name = "application" },
+  { value = "infrastructure", name = "infrastructure" },
+  { value = "presentation", name = "presentation" },
+
+  { value = "auth", name = "auth" },
+  { value = "rest", name = "rest" },
+  { value = "graphql", name = "graphql" },
+  { value = "postgres", name = "postgres" },
+  { value = "repository", name = "repository" },
+  { value = "migrations", name = "migrations" },
+
+  { value = "docker", name = "docker" },
+  { value = "config", name = "config" },
+  { value = "docs", name = "docs" },
+  { value = "tests", name = "tests" },
+  { value = "ci", name = "ci" },
+  { value = "deps", name = "deps" },
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Commit message: "
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "description"
+message = "description (optional):"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "issue_number"
+message = "Issue number (optional):"

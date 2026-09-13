@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fastapi_core_clean_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_ENV: test
+      APP_VERSION: 0.1.0
+      JWT_SECRET: ci-test-secret
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fastapi_core_clean_test
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST_TEST: 127.0.0.1
+      POSTGRES_USER_TEST: postgres
+      POSTGRES_PASSWORD_TEST: postgres
+      POSTGRES_DB_TEST: fastapi_core_clean_test
+      POSTGRES_PORT_TEST: 5432
+      SEED_ON_BOOT: "true"
+      SUPER_USER_NAME: admin
+      SUPER_USER_USERNAME: admin
+      SUPER_USER_PASSWORD: admin
+      MEMBER_USER_NAME: member
+      MEMBER_USER_USERNAME: member
+      MEMBER_USER_PASSWORD: member
+      CORS_ORIGINS: "*"
+      THROTTLE_TTL_SECONDS: 60
+      THROTTLE_LIMIT: 1000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pip install poetry==2.4.1
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi
+
+      - name: Ruff
+        run: poetry run ruff check app tests
+
+      - name: Ruff format check
+        run: poetry run ruff format --check app tests
+
+      - name: Mypy
+        run: poetry run mypy app
+
+      - name: Bandit
+        run: poetry run bandit -r app -ll
+
+      - name: Export GraphQL schema and check drift
+        run: |
+          poetry run python scripts/export_schema.py
+          git diff --exit-code -- schema.graphql
+
+      - name: Prepare test database
+        run: |
+          poetry run python scripts/create_test_db.py
+          poetry run alembic upgrade head
+
+      - name: Pytest
+        run: poetry run pytest -q

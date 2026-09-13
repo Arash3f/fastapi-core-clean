@@ -1,0 +1,111 @@
+input ChangeMyPasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input ChangePasswordInput {
+  userId: UUID!
+  newPassword: String!
+}
+
+input CreateUserInput {
+  name: String!
+  username: String!
+  password: String!
+  role: RoleGql! = Member
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+type Mutation {
+  login(input: LoginInput!): TokenType!
+  register(input: RegisterInput!): TokenType!
+  logout: SuccessType!
+  refreshToken(input: RefreshTokenInput!): TokenType!
+  changeMyPassword(input: ChangeMyPasswordInput!): SuccessType!
+  changePassword(input: ChangePasswordInput!): SuccessType!
+  createUser(input: CreateUserInput!): UserType!
+  updateMe(input: UpdateMeInput!): UserType!
+  updateUser(input: UpdateUserInput!): UserType!
+  deleteUser(userId: ID!): SuccessType!
+}
+
+type Query {
+  me: UserType!
+  users(input: ReadUsersInput = null): UserListType!
+}
+
+input ReadUsersInput {
+  filters: UserFiltersInput = null
+  page: Int! = 1
+  pageSize: Int! = 20
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
+input RegisterInput {
+  name: String!
+  username: String!
+  password: String!
+}
+
+enum RoleGql {
+  Admin
+  Member
+}
+
+type SuccessType {
+  success: Boolean!
+}
+
+type TokenType {
+  accessToken: String!
+  refreshToken: String!
+}
+
+scalar UUID
+
+input UpdateMeInput {
+  name: String = null
+  username: String = null
+}
+
+input UpdateUserInput {
+  id: UUID!
+  name: String = null
+  username: String = null
+  role: RoleGql = null
+  active: Boolean = null
+}
+
+input UserFiltersInput {
+  username: String = null
+  name: String = null
+  role: RoleGql = null
+  active: Boolean = null
+}
+
+type UserListType {
+  items: [UserType!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type UserType {
+  id: UUID!
+  username: String!
+  name: String!
+  active: Boolean!
+  role: RoleGql!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
